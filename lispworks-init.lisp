@@ -10,16 +10,15 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
-  (system::enter-new-nicknames :alexandria '(:al)))
-
-(block nil
-  (handler-bind ((conditions:symbol-name-conflict
-                  #'(lambda (c)
-                      (shadowing-import (mapcar #'(lambda (s) (find-symbol (symbol-name s) :al))
-                                                (conditions:symbol-name-conflict-symbol-list c)))
-                      (use-package :al)
-                      (return t))))
-    (use-package :al)))
+  (system::enter-new-nicknames :alexandria '(:al))
+  (block nil
+    (handler-bind ((conditions:symbol-name-conflict
+                    #'(lambda (c)
+                        (shadowing-import (mapcar #'(lambda (s) (find-symbol (symbol-name s) :al))
+                                                  (conditions:symbol-name-conflict-symbol-list c)))
+                        (use-package :al)
+                        (return t))))
+      (use-package :al))))
 
 
 ;;; change default
@@ -31,10 +30,14 @@
 (defun load-relative (path)
   (load (merge-pathnames path (or *load-pathname* *compile-file-pathname*))))
 
-(defmacro with-external-format (ef &body body)
-  `(let ((system:*specific-valid-file-encodings* '(,ef))
-         (*default-character-element-type* (external-format-type ',ef)))
-     ,@body))
+(defmacro with-external-format ((&rest ef) &body body)
+  (with-gensyms (char-type)
+    `(let* ((,char-type (external-format-type ',ef))
+            (*default-character-element-type* (if (eql ,char-type 'simple-char)
+                                                  'character 
+                                                ,char-type))
+            (system:*specific-valid-file-encodings* '(,ef)))
+       ,@body)))
 
 
 ;;; IDE
