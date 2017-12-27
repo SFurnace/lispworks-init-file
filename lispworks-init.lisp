@@ -3,11 +3,14 @@
 (load-all-patches)
 
 ;;; packages
-(let ((quicklisp-init (merge-pathnames "Documents/Runable/lib/quicklisp/setup.lisp" (user-homedir-pathname))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (let ((quicklisp-init (merge-pathnames "Documents/Runable/lib/quicklisp/setup.lisp" (user-homedir-pathname))))
   (when (probe-file quicklisp-init)
-    (load quicklisp-init)))
-(ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
-(system::enter-new-nicknames :alexandria '(:al))
+    (load quicklisp-init))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
+  (system::enter-new-nicknames :alexandria '(:al)))
 
 (block nil
   (handler-bind ((conditions:symbol-name-conflict
@@ -21,14 +24,17 @@
 
 ;;; change default
 (setf *read-default-float-format* 'double-float)
-(set-default-character-element-type 'character)
-(pushnew :utf-8 system:*specific-valid-file-encodings*)
 (mp:schedule-timer (mp:make-timer #'(lambda () (cl-interpol:enable-interpol-syntax))) 1)
 
 
-;;; functions
+;;; utils
 (defun load-relative (path)
   (load (merge-pathnames path (or *load-pathname* *compile-file-pathname*))))
+
+(defmacro with-external-format (ef &body body)
+  `(let ((system:*specific-valid-file-encodings* '(,ef))
+         (*default-character-element-type* (external-format-type ',ef)))
+     ,@body))
 
 
 ;;; IDE
