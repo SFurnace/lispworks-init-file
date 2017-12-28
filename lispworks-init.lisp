@@ -3,12 +3,12 @@
 (load-all-patches)
 
 ;;; packages
-(eval-when (:compile-toplevel :load-toplevel :execute)
+(eval-when (:compile-toplevel :load-toplevel)
   (let ((quicklisp-init (merge-pathnames "Documents/Runable/lib/quicklisp/setup.lisp" (user-homedir-pathname))))
   (when (probe-file quicklisp-init)
     (load quicklisp-init))))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
+(eval-when (:compile-toplevel :load-toplevel)
   (ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
   (system::enter-new-nicknames :alexandria '(:al))
   (block nil
@@ -58,7 +58,7 @@
   (mac-bind-key "Find File" #("Ctrl-x" #\f))
   (mac-bind-key "Set Fill Column" #("Ctrl-x" "Ctrl-f"))
   
-  (mac-bind-key "Comment Region" "Hyper-/")
+  (mac-bind-key "Comment Region" "Meta-;")
   (mac-bind-key "Indent Region" "Hyper-Meta-l")
   (mac-bind-key "Function Argument List" "Meta-=")
   (mac-bind-key "Function Arglist Displayer" "Meta--")
