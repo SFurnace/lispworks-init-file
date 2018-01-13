@@ -36,7 +36,10 @@
             (*default-character-element-type* (if (eql ,char-type 'simple-char)
                                                   'character 
                                                 ,char-type))
-            (system:*specific-valid-file-encodings* '(,ef)))
+            (system:*file-encoding-detection-algorithm*
+             (list #'(lambda (pathname ef-spec buffer length)
+                       (declare (ignore pathname buffer length))
+                       (system:merge-ef-specs ef-spec ',ef)))))
        ,@body)))
 
 
