@@ -3,48 +3,16 @@
 (load-all-patches)
 
 ;;; packages
-(eval-when (:compile-toplevel :load-toplevel)
-  (let ((quicklisp-init (merge-pathnames "Documents/Runable/lib/quicklisp/setup.lisp" (user-homedir-pathname))))
-  (when (probe-file quicklisp-init)
-    (load quicklisp-init))))
-
-(eval-when (:compile-toplevel :load-toplevel)
-  (ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
-  (system::enter-new-nicknames :alexandria '(:al))
-  (block nil
-    (handler-bind ((conditions:symbol-name-conflict
-                    #'(lambda (c)
-                        (shadowing-import (mapcar #'(lambda (s) (find-symbol (symbol-name s) :al))
-                                                  (conditions:symbol-name-conflict-symbol-list c)))
-                        (use-package :al)
-                        (return t))))
-      (use-package :al))))
-
+(load "~/Documents/Runable/lib/quicklisp/setup.lisp")
+(ql:quickload '(:alexandria :cl-ppcre :cl-interpol) :silent t)
+(system::enter-new-nicknames :alexandria '(:al))
 
 ;;; change default
 (setf *read-default-float-format* 'double-float)
 (mp:schedule-timer (mp:make-timer #'(lambda () (cl-interpol:enable-interpol-syntax))) 1)
 
-
-;;; utils
-(defun load-relative (path)
-  (load (merge-pathnames path (or *load-pathname* *compile-file-pathname*))))
-
-(defmacro with-external-format ((&rest ef) &body body)
-  (with-gensyms (char-type)
-    `(let* ((,char-type (external-format-type ',ef))
-            (*default-character-element-type* (if (eql ,char-type 'simple-char)
-                                                  'character 
-                                                ,char-type))
-            (system:*file-encoding-detection-algorithm*
-             (list #'(lambda (pathname ef-spec buffer length)
-                       (declare (ignore pathname buffer length))
-                       (system:merge-ef-specs ef-spec ',ef)))))
-       ,@body)))
-
-
 ;;; IDE
-(setf *inspect-through-gui* t)
+(setq *inspect-through-gui* t)
 (setf (editor:variable-value 'editor:backups-wanted) nil)
 (flet ((mac-bind-key (command key &rest specific)
          (if specific
@@ -78,5 +46,4 @@
   (mac-bind-key "Compile Buffer" "F7")
   (mac-bind-key "Clear Listener" #("Ctrl-c" "Meta-o") :mode "Pc Execute")
   (mac-bind-key "History Previous" "Meta-p" :mode "Pc Execute")
-  (mac-bind-key "History Next" "Meta-n" :mode "Pc Execute")
-  )
+  (mac-bind-key "History Next" "Meta-n" :mode "Pc Execute"))
